@@ -1,6 +1,6 @@
 import random
 from typing import List, Dict, Callable, Any, Tuple
-
+import os
 import numpy as np
 import pandas as pd
 import matplotlib as mpl
@@ -708,7 +708,8 @@ class PlotUtils:
 
 
 if __name__ == "__main__":
-    folder: str = "/home/luigi/Desktop/codebase/python_data/BooleanCryptoGP/"
+    codebase_folder: str = os.environ['CURRENT_CODEBASE_FOLDER']
+    folder: str = codebase_folder + "python_data/BooleanCryptoGP/"
     exp_name: str = "results_1"
     #print(mpl.font_manager.get_font_names())
     '''
