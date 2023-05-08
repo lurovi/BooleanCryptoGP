@@ -1,5 +1,5 @@
 import numpy as np
-from typing import Dict, List
+from typing import Dict, List, Tuple
 from boolcryptogp.nsgp.structure.FullBinaryDomain import FullBinaryDomain
 
 
@@ -43,21 +43,21 @@ class WalshTransform:
         m: float = float(np.max(x))
         return (2 ** (self.__domain.number_of_bits() - 1)) - 0.5 * m
 
-    def apply(self, result: np.ndarray) -> np.ndarray:
+    def apply(self, result: np.ndarray) -> Tuple[np.ndarray, int]:
         #res: np.ndarray = np.tile(result, (self.__domain.space_cardinality(), 1))
         #res = np.logical_xor(res, self.__pairwise_scalar_prod)
         #res = np.power(-1, res)
         #return np.sum(res, axis=1)
         return self.__fast_walsh_transform_init(result)
 
-    def invert(self, spectrum: np.ndarray, directly_go_to_truth_table: bool = False) -> np.ndarray:
+    def invert(self, spectrum: np.ndarray, directly_go_to_truth_table: bool = False) -> Tuple[np.ndarray, int]:
         return self.__inverse_fast_walsh_transform_init(spectrum, directly_go_to_truth_table)
 
-    def __fast_walsh_transform_init(self, result: np.ndarray) -> np.ndarray:
+    def __fast_walsh_transform_init(self, result: np.ndarray) -> Tuple[np.ndarray, int]:
         polar_form: np.ndarray = FullBinaryDomain.convert_truth_table_to_polar_form(result)
         l: List[int] = polar_form.tolist()
-        _ = self.__fast_walsh_transform(l, 0, len(l))
-        return np.array(l)
+        spectral_radius: int = self.__fast_walsh_transform(l, 0, len(l))
+        return np.array(l), spectral_radius
 
     def __fast_walsh_transform(self, v: List[int], start: int, length: int) -> int:
         half: int = length // 2
@@ -76,20 +76,20 @@ class WalshTransform:
             else:
                 return abs(v[start + half])
 
-    def __inverse_fast_walsh_transform_init(self, result: np.ndarray, directly_go_to_truth_table: bool = False) -> np.ndarray:
+    def __inverse_fast_walsh_transform_init(self, result: np.ndarray, directly_go_to_truth_table: bool = False) -> Tuple[np.ndarray, int]:
         l: List[int] = result.tolist()
-        _ = self.__inverse_fast_walsh_transform(l, 0, len(l))
-        r: np.ndarray = np.array(l, dtype=np.int32)
+        max_auto_correlation_coefficient: int = self.__inverse_fast_walsh_transform(l, 0, len(l))
+        r: np.ndarray = np.array(l, dtype=np.int64)
         if not directly_go_to_truth_table:
-            return r
-        return FullBinaryDomain.convert_polar_form_to_truth_table(r)
+            return r, max_auto_correlation_coefficient
+        return FullBinaryDomain.convert_polar_form_to_truth_table(r), max_auto_correlation_coefficient
 
     def __inverse_fast_walsh_transform(self, v: List[int], start: int, length: int) -> int:
         half: int = length // 2
         for i in range(start, start + half):
             temp: int = v[i]
-            v[i] = (v[i] + v[i + half]) // 2
-            v[i + half] = (temp - v[i + half]) // 2
+            v[i] = int( (v[i] + v[i + half]) / 2.0 )
+            v[i + half] = int( (temp - v[i + half]) / 2.0 )
 
         if half > 1:
             val1: int = self.__inverse_fast_walsh_transform(v, start, half)

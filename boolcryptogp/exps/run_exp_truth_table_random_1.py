@@ -1,6 +1,6 @@
 import argparse
 from typing import Tuple, List
-
+import os
 import pandas as pd
 import time
 from boolcryptogp.nsgp.problem.BooleanFunctionProblemRunner import BooleanFunctionProblemRunner
@@ -8,8 +8,11 @@ from boolcryptogp.util.ResultUtils import ResultUtils
 
 
 if __name__ == "__main__":
-    folder_name: str = "results_1"
-    pop_size: int = 1000
+    codebase_folder: str = os.environ['CURRENT_CODEBASE_FOLDER']
+    folder_name: str = codebase_folder + 'python_projects/BooleanCryptoGP/boolcryptogp/exps/' + "results_3"
+    pop_size: int = 500 * 5
+
+    non_linearity_only: bool = True
 
     parser: argparse.ArgumentParser = argparse.ArgumentParser()
     parser.add_argument('-s', '--seed', type=str, help='Seed to be adopted for the experiment run.', required=False)
@@ -37,8 +40,10 @@ if __name__ == "__main__":
                 t: Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, str] = runner.run_truth_table_function_only_initialization(pop_size=pop_size,
                                                                                                                               seed=seed_i,
                                                                                                                               multiprocess=True,
-                                                                                                                              make_it_balanced=make_it_balanced,
-                                                                                                                              binary_balancing=True)
+                                                                                                                              binary_balancing=True,
+                                                                                                                              non_linearity_only=non_linearity_only,
+                                                                                                                              make_it_balanced=make_it_balanced
+                                                                                                                              )
 
                 ResultUtils.write_result_to_csv(path=folder_name+"/", run_id=t[3], pareto_front_df=t[0], all_stats=t[1], population_per_generation=t[2])
                 print("NEXT")

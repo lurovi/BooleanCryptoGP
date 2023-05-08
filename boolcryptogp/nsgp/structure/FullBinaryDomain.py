@@ -9,12 +9,16 @@ class FullBinaryDomain:
         self.__n_bits: int = n_bits
         self.__space_cardinality: int = 2 ** n_bits
         res: List[List[int]] = []
+        polar_res: List[List[int]] = []
         for i in range(self.__space_cardinality):
             curr_res: List[int] = [int(j) for j in bin(i)[2:]]
             missing_bits: int = n_bits - len(curr_res)
             curr_res = [0] * missing_bits + curr_res
             res.append(curr_res)
+            polar_res.append([1 if j == 0 else -1 for j in curr_res])
         self.__data: np.ndarray = np.array(res)
+        self.__polar_data: np.ndarray = np.array(polar_res)
+        self.__data_pure_int: np.ndarray = np.arange(self.__space_cardinality, dtype=np.int32).reshape(-1, 1)
 
     def number_of_bits(self) -> int:
         return self.__n_bits
@@ -25,15 +29,21 @@ class FullBinaryDomain:
     def data(self) -> np.ndarray:
         return self.__data
 
+    def polar_data(self) -> np.ndarray:
+        return self.__polar_data
+
+    def integers(self) -> np.ndarray:
+        return self.__data_pure_int
+
     def balancing(self, output: np.ndarray) -> int:
         num_of_zeros: int = (output == 0).sum()
         return abs(num_of_zeros - (self.space_cardinality() - num_of_zeros))
 
-    def degree(self, output: np.ndarray) -> int:  # Fast Mobius Transform
+    def degree(self, output: np.ndarray) -> Tuple[List[int], int]:  # Fast Mobius Transform
         truth_table: List[int] = output.tolist()
         length: int = len(truth_table)
         deg: int = self.__degree(truth_table, 0, length)
-        return deg
+        return truth_table, deg
 
     def __degree(self, truth_table: List[int], start: int, length: int) -> int:
         half: int = length // 2
