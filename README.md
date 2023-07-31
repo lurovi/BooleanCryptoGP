@@ -1,6 +1,6 @@
 # BooleanCryptoGP
 
-The code is based on Python 3.9.
+The code is based on Python 3.10.11.
 
 Main libraries:
 - numpy
