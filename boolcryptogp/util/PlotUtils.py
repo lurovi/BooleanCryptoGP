@@ -1,4 +1,5 @@
 import random
+import statistics
 from typing import List, Dict, Callable, Any, Tuple
 import os
 import numpy as np
@@ -162,7 +163,7 @@ class PlotUtils:
                         kind="line", palette="colorblind")
         g.fig.subplots_adjust(top=0.9)
         g.fig.suptitle('Mean balancedness trend over the evolution')
-        plt.savefig("/home/luigi/Desktop/img/" + "MeanBalancing-every-bit.png")
+        plt.savefig("/home/img/" + "MeanBalancing-every-bit.png")
         # plt.show()
         plt.clf()
         plt.cla()
@@ -208,7 +209,7 @@ class PlotUtils:
         else:
             plt.title(objective + " trend over the evolution when n = " + str(n_bits))
         plt.legend(fontsize='small', title_fontsize='small', loc="center right")
-        plt.savefig("/home/luigi/Desktop/img/" + objective + "-" + str(n_bits) + "bit.png")
+        plt.savefig("/home/img/" + objective + "-" + str(n_bits) + "bit.png")
         #plt.show()
         plt.clf()
         plt.cla()
@@ -255,7 +256,7 @@ class PlotUtils:
         plt.title(objective + " trend over the evolution")
         # plt.yscale('log')
         plt.legend(fontsize='small', title_fontsize='small')
-        plt.savefig("/home/luigi/Desktop/img/" + objective + "-more-bit.png")
+        plt.savefig("/home/img/" + objective + "-more-bit.png")
         # plt.show()
         plt.clf()
         plt.cla()
@@ -296,7 +297,7 @@ class PlotUtils:
         g = sns.relplot(data=data, x="Generation", y="Value", hue="Statistic", style="Bit", col="Uncertainty Filling", kind="line", palette="colorblind")
         g.fig.subplots_adjust(top=0.9)
         g.fig.suptitle(objective + " trend over the evolution")
-        plt.savefig("/home/luigi/Desktop/img/" + objective + "-more-bit-uncertainty.png")
+        plt.savefig("/home/img/" + objective + "-more-bit-uncertainty.png")
         # plt.show()
         plt.clf()
         plt.cla()
@@ -323,8 +324,10 @@ class PlotUtils:
         print(data.head(2000))
     '''
 
+    # USE THIS METHOD TO CREATE SOME SEA BORN LINEPLOT FOR ALL GENERATIONS W.R.T. A GIVEN OBJECTIVE AND STATISTIC
     @staticmethod
     def simple_stat_objective_plot(folder_name: str,
+                                   exp_name: str,
                                    method: str,
                                    n_bits: int,
                                    pop_size: int,
@@ -349,7 +352,7 @@ class PlotUtils:
         dataframes: List[pd.DataFrame] = []
         for seed in seed_list:
             path: str = f"stat-pseudobooleanfunctions{method}-{n_bits}bit-popsize{pop_size}-numgen{num_gen}-maxdepth{max_depth}-pressure{pressure}-makeitbalanced{make_it_balanced_int}-forcebent{force_bent_int}-spectralinversion{spectral_inversion_int}-datasettype_{dataset_type}-nearestboolmapping_{nearest_bool_mapping}-bentmapping_{bent_mapping}-binarybalancing{binary_balancing_int}-nonlinearityonly{non_linearity_only_int}-SEED{seed}.csv"
-            curr_data: pd.DataFrame = pd.read_csv(folder_name + "/" + path)
+            curr_data: pd.DataFrame = pd.read_csv(folder_name + exp_name + "/" + path)
             curr_data.drop("Unnamed: 0", inplace=True, axis=1)
             dataframes.append(curr_data)
         data: pd.DataFrame = pd.concat(dataframes, ignore_index=True)
@@ -366,14 +369,16 @@ class PlotUtils:
         g = sns.lineplot(data=data, x="Generation", y="Value", hue="Statistic", palette="colorblind")
         plt.title(objective)
         plt.legend(fontsize='small', title_fontsize='small')
-        plt.savefig("/home/luigi/Desktop/codebase/python_data/BooleanCryptoGP/img/"+objective+"-"+str(n_bits)+"bit"+"-"+("Balancing" if make_it_balanced else "Random")+".png")
+        plt.savefig(folder_name+"img/"+objective+"-"+str(n_bits)+"bit"+"-"+("Balancing" if make_it_balanced else "Random")+".png")
         # plt.show()
         plt.clf()
         plt.cla()
         plt.close()
 
+    # USE THIS METHOD TO PRINT THE STATISTICS FOR THE TABLE OF THE BALANCEDNESS DEGREE ALONG WITH MEAN STD AND P-VALUE
     @staticmethod
     def plot_all_non_linearity_zero_balancing_resiliency_max_degree_stats(folder_name: str,
+                                                                          exp_name: str,
                                                                           method: str,
                                                                           n_bits_list: List[int],
                                                                           pop_size: int,
@@ -398,7 +403,7 @@ class PlotUtils:
             for seed in seed_list:
                 for make_it_balanced_int in [1, 0]:
                     path: str = f"best-pseudobooleanfunctions{method}-{n_bits}bit-popsize{pop_size}-numgen{num_gen}-maxdepth{max_depth}-pressure{pressure}-makeitbalanced{make_it_balanced_int}-forcebent{force_bent_int}-spectralinversion{spectral_inversion_int}-datasettype_{dataset_type}-nearestboolmapping_{nearest_bool_mapping}-bentmapping_{bent_mapping}-binarybalancing{binary_balancing_int}-nonlinearityonly{non_linearity_only_int}-SEED{seed}.csv"
-                    curr_data: pd.DataFrame = pd.read_csv(folder_name + "/" + path)
+                    curr_data: pd.DataFrame = pd.read_csv(folder_name + exp_name + "/" + path)
                     curr_data.drop("Unnamed: 0", inplace=True, axis=1)
                     curr_data = curr_data[["Degree", "Balancing", "NonLinearity", "Resiliency", "TruthTable"]]
                     #print()
@@ -472,7 +477,7 @@ class PlotUtils:
                       rc={'figure.figsize': (12, 8), 'pdf.fonttype': 42, 'ps.fonttype': 42,
                           'axes.formatter.use_mathtext': True, 'axes.unicode_minus': False})
         g = sns.boxplot(data=pd.DataFrame(df), x="Bit", y="NonLinearity", hue="UncertaintyFilling", orient="v")
-        plt.savefig("/home/luigi/Desktop/img/Boxplot-more-bit.png")
+        plt.savefig("/home/img/Boxplot-more-bit.png")
         '''
         '''
         txt_data: Dict[str, List[Any]] = {"Bit": [], "UncertaintyFilling": [], "Min": [], "Q1": [], "Median": [], "Q3": [], "Max": []}
@@ -490,7 +495,7 @@ class PlotUtils:
                 txt_data["Median"].append(np.median(scaled_a))
                 txt_data["Q3"].append(np.percentile(scaled_a, 75))
                 txt_data["Max"].append(np.max(scaled_a))
-        pd.DataFrame(txt_data).to_csv(path_or_buf="/home/luigi/Desktop/img/boxplot_data.txt", header=True, index=False, sep=" ")
+        pd.DataFrame(txt_data).to_csv(path_or_buf="/home/img/boxplot_data.txt", header=True, index=False, sep=" ")
         '''
         '''
         actual_bit_list: List[int] = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
@@ -507,11 +512,13 @@ class PlotUtils:
                 #if n_bits == 8:
                 #    scaled_a = [nl + random.uniform(-9e-6, 9e-6) for nl in scaled_a]
                 txt_data[uncertainty_filling+str(n_bits)].extend(scaled_a)
-        pd.DataFrame(txt_data).to_csv(path_or_buf="/home/luigi/Desktop/img/boxplot_data_"+method+".dat", header=True, index=False, sep=" ")
+        pd.DataFrame(txt_data).to_csv(path_or_buf="/home/img/boxplot_data_"+method+".dat", header=True, index=False, sep=" ")
         '''
 
+    # USE THIS METHOD FOR GENERATING THE BOX PLOT .dat FILE WITH GP vs RS FOR A GIVEN FUNCTION SET TERMINAL SET AND SO ON
     @staticmethod
     def plot_all_non_linearity_zero_balancing_resiliency_max_degree_stats_all_algorithms(folder_name: str,
+                                                                                         exp_name: str,
                                                                                          n_bits_list: List[int],
                                                                                          pop_size: int,
                                                                                          num_gen: int,
@@ -545,7 +552,7 @@ class PlotUtils:
                             path: str = f"best-pseudobooleanfunctionsRANDOM-{n_bits}bit-popsize{curr_sample_size}-numgen{0}-maxdepth{max_depth}-pressure{0}-makeitbalanced{make_it_balanced_int}-forcebent{force_bent_int}-spectralinversion{spectral_inversion_int}-datasettype_{dataset_type}-nearestboolmapping_{nearest_bool_mapping}-bentmapping_{bent_mapping}-binarybalancing{binary_balancing_int}-nonlinearityonly{non_linearity_only_int}-SEED{seed}.csv"
                         else:
                             path: str = f"best-pseudobooleanfunctions{method}-{n_bits}bit-popsize{pop_size}-numgen{num_gen}-maxdepth{max_depth}-pressure{pressure}-makeitbalanced{make_it_balanced_int}-forcebent{force_bent_int}-spectralinversion{spectral_inversion_int}-datasettype_{dataset_type}-nearestboolmapping_{nearest_bool_mapping}-bentmapping_{bent_mapping}-binarybalancing{binary_balancing_int}-nonlinearityonly{non_linearity_only_int}-SEED{seed}.csv"
-                        curr_data: pd.DataFrame = pd.read_csv(folder_name + "/" + path)
+                        curr_data: pd.DataFrame = pd.read_csv(folder_name + exp_name + "/" + path)
                         curr_data.drop("Unnamed: 0", inplace=True, axis=1)
                         curr_data = curr_data[["Degree", "Balancing", "NonLinearity", "Resiliency"]]
                         #curr_data = curr_data[curr_data["Balancing"] == 0]
@@ -587,15 +594,104 @@ class PlotUtils:
                 for method in all_methods:
                     a: List[int] = non_linearity[method][n_bits][uncertainty_filling]
                     scaled_a: List[float] = [nl / crb for nl in a]
-                    #if pop_size == 500 and num_gen == 5 and max_depth == 5 and pressure == 5:
-                    #    if n_bits == 8 and uncertainty_filling == "Balancing":
-                    #        scaled_a = [nl + random.uniform(-9e-7, 9e-7) for nl in scaled_a]
+
+                    if pop_size == 500 and num_gen == 5 and max_depth == 5 and pressure == 5:
+                        if n_bits == 8 and uncertainty_filling == "Balancing":
+                            scaled_a = [nl + random.uniform(-9e-7, 9e-7) for nl in scaled_a]
+                    
                     txt_data[uncertainty_filling + str(n_bits) + method].extend(scaled_a)
-        pd.DataFrame(txt_data).to_csv(path_or_buf="/home/luigi/Desktop/codebase/python_data/BooleanCryptoGP/img/boxplot_data_" + "every_" + str(pop_size) + "_" + str(num_gen) + ".dat",
+        pd.DataFrame(txt_data).to_csv(path_or_buf=folder_name+"img/boxplot_data_" + "every_" + str(pop_size) + "_" + str(num_gen) + ".dat",
+                                      header=True, index=False, sep=" ")
+
+    # USE THIS METHOD FOR GENERATING THE LINE PLOT .dat FILE WITH A GIVEN OBJECTIVE, SUCH AS UNCERTAINTY POSITIONS PERCENTAGE
+    @staticmethod
+    def write_objective_line_plot_to_dat_file(folder_name: str,
+                                            exp_name: str,
+                                            n_bits_list: List[int],
+                                            pop_size: int,
+                                            num_gen: int,
+                                            max_depth: int,
+                                            pressure: int,
+                                            make_it_balanced: bool,
+                                            force_bent: bool,
+                                            spectral_inversion: bool,
+                                            dataset_type: str,
+                                            nearest_bool_mapping: str,
+                                            bent_mapping: str,
+                                            binary_balancing: bool,
+                                            non_linearity_only: bool,
+                                            seed_list: List[int],
+                                            objective: str) -> None:
+        binary_balancing_int: int = int(binary_balancing)
+        force_bent_int: int = int(force_bent)
+        non_linearity_only_int: int = int(non_linearity_only)
+        spectral_inversion_int: int = int(spectral_inversion)
+        make_it_balanced_int: int = int(make_it_balanced)
+
+        # K1: N. Bits, K2: NumGen, V: list of objective values (one for each seed)
+        objective_values: dict[int, dict[int, dict[str, list[float]]]] = {}
+
+        for n_bits in n_bits_list:
+            for seed in seed_list:
+                path: str = f"stat-pseudobooleanfunctions{'GPNSGA2'}-{n_bits}bit-popsize{pop_size}-numgen{num_gen}-maxdepth{max_depth}-pressure{pressure}-makeitbalanced{make_it_balanced_int}-forcebent{force_bent_int}-spectralinversion{spectral_inversion_int}-datasettype_{dataset_type}-nearestboolmapping_{nearest_bool_mapping}-bentmapping_{bent_mapping}-binarybalancing{binary_balancing_int}-nonlinearityonly{non_linearity_only_int}-SEED{seed}.csv"
+                curr_data: pd.DataFrame = pd.read_csv(folder_name + exp_name + "/" + path)
+                curr_data.drop("Unnamed: 0", inplace=True, axis=1)
+                curr_data = curr_data[['Generation', 'Objective', 'Statistic', 'Value']]
+                curr_data = curr_data[(curr_data["Statistic"] == "mean") | (curr_data["Statistic"] == "std")]
+                curr_data = curr_data[curr_data["Objective"] == objective]
+                curr_data["Statistic"] = curr_data["Statistic"].apply(lambda x: x[0].upper() + x[1:])
+                
+                if n_bits not in objective_values:
+                    objective_values[n_bits] = {}
+
+                for curr_num_gen in range(num_gen):
+                    if curr_num_gen not in objective_values[n_bits]:
+                        objective_values[n_bits][curr_num_gen] = {'Mean': [], 'VarL': [], 'VarH': []}
+                    current_mean_val: float = round(curr_data[(curr_data["Generation"] == curr_num_gen) & (curr_data["Statistic"] == 'Mean')]['Value'].iloc[0], 2)
+                    current_var_val: float = round(curr_data[(curr_data["Generation"] == curr_num_gen) & (curr_data["Statistic"] == 'Std')]['Value'].iloc[0] ** 2, 2)
+                    objective_values[n_bits][curr_num_gen]['Mean'].append(current_mean_val)
+                    objective_values[n_bits][curr_num_gen]['VarL'].append(current_mean_val - current_var_val)
+                    objective_values[n_bits][curr_num_gen]['VarH'].append(current_mean_val + current_var_val)
+
+        txt_data: dict[str, list[Any]] = {"Generation": [curr_num_gen for curr_num_gen in range(num_gen)]}
+        txt_data = txt_data | {str(n_bits)+'bit_Mean': [] for n_bits in n_bits_list}
+        txt_data = txt_data | {str(n_bits)+'bit_VarL': [] for n_bits in n_bits_list}
+        txt_data = txt_data | {str(n_bits)+'bit_VarH': [] for n_bits in n_bits_list}
+        actual_bit_list: List[int] = n_bits_list # [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+
+        for n_bits in n_bits_list:
+            if n_bits not in actual_bit_list:
+                continue
+            for curr_num_gen in range(num_gen):
+                mean_value: float = statistics.mean(objective_values[n_bits][curr_num_gen]['Mean'])
+                varL_value: float = statistics.mean(objective_values[n_bits][curr_num_gen]['VarL'])
+                varH_value: float = statistics.mean(objective_values[n_bits][curr_num_gen]['VarH'])
+                txt_data[str(n_bits)+'bit_Mean'].append(mean_value)
+                txt_data[str(n_bits)+'bit_VarL'].append(varL_value)
+                txt_data[str(n_bits)+'bit_VarH'].append(varH_value)
+
+        name_of_the_thing: str = ''
+        if exp_name in ('results_1', 'results_2'):
+            name_of_the_thing += 'F1_'
+        elif exp_name in ('results_3', 'results_4'):
+            name_of_the_thing += 'F2_'
+
+        if dataset_type == 'integer':
+            name_of_the_thing += 'N'
+        elif dataset_type == 'binary':
+            name_of_the_thing += 'B'
+        elif dataset_type == 'polar':
+            name_of_the_thing += 'P'
+
+        if exp_name in ('results_1', 'results_3'):
+            name_of_the_thing += 'ERC'
+
+        pd.DataFrame(txt_data).to_csv(path_or_buf=folder_name+"img/data_mdpi_paper/"+name_of_the_thing+"/lineplot_data_" + "every_" + str(pop_size) + "_" + str(num_gen) + '_' + 'balanced' + str(make_it_balanced_int) + '_' + objective + ".dat",
                                       header=True, index=False, sep=" ")
 
     @staticmethod
     def plot_all_non_linearity_zero_balancing_resiliency_max_degree_stats_random_all_representations(folder_name: str,
+                                                                                                     exp_name: str,
                                                                                                      n_bits_list: List[int],
                                                                                                      pop_size: int,
                                                                                                      num_gen: int,
@@ -618,7 +714,7 @@ class PlotUtils:
                             path: str = f"best-pseudobooleanfunctionsRANDOM-{n_bits}bit-popsize{sample_size_tot}-numgen{0}-maxdepth{max_depth}-makeitbalanced{make_it_balanced_int}-forcebent{force_bent_int}-binarybalancing{binary_balancing_int}-SEED{seed}.csv"
                         else:
                             path: str = f"best-truthtablefunctionsRANDOM-{n_bits}bit-popsize{sample_size_tot}-numgen{0}-maxdepth{0}-makeitbalanced{make_it_balanced_int}-forcebent{0}-binarybalancing{binary_balancing_int}-SEED{seed}.csv"
-                        curr_data: pd.DataFrame = pd.read_csv(folder_name + "/" + path)
+                        curr_data: pd.DataFrame = pd.read_csv(folder_name + exp_name + "/" + path)
                         curr_data.drop("Unnamed: 0", inplace=True, axis=1)
                         curr_data = curr_data[["Degree", "Balancing", "NonLinearity", "Resiliency"]]
                         curr_data = curr_data[curr_data["Balancing"] == 0]
@@ -661,11 +757,12 @@ class PlotUtils:
                     scaled_a: List[float] = [nl / crb for nl in a]
                     txt_data[uncertainty_filling + str(n_bits) + method].extend(scaled_a)
         pd.DataFrame(txt_data).to_csv(
-            path_or_buf="/home/luigi/Desktop/img/boxplot_data_" + "just_random_" + str(sample_size_tot) + ".dat",
+            path_or_buf=folder_name+"img/boxplot_data_" + "just_random_" + str(sample_size_tot) + ".dat",
             header=True, index=False, sep=" ")
 
     @staticmethod
     def check_pareto_front_values(folder_name: str,
+                                  exp_name: str,
                                   method: str,
                                   n_bits_list: List[int],
                                   pop_size: int,
@@ -689,7 +786,7 @@ class PlotUtils:
             for seed in seed_list:
                 for make_it_balanced_int in [1, 0]:
                     path: str = f"best-pseudobooleanfunctions{method}-{n_bits}bit-popsize{pop_size}-numgen{num_gen}-maxdepth{max_depth}-pressure{pressure}-makeitbalanced{make_it_balanced_int}-forcebent{force_bent_int}-spectralinversion{spectral_inversion_int}-datasettype_{dataset_type}-nearestboolmapping_{nearest_bool_mapping}-bentmapping_{bent_mapping}-binarybalancing{binary_balancing_int}-nonlinearityonly{non_linearity_only_int}-SEED{seed}.csv"
-                    curr_data: pd.DataFrame = pd.read_csv(folder_name + "/" + path)
+                    curr_data: pd.DataFrame = pd.read_csv(folder_name + exp_name + "/" + path)
                     curr_data.drop("Unnamed: 0", inplace=True, axis=1)
                     curr_data = curr_data[["Degree", "Balancing", "NonLinearity", "Resiliency"]]
                     #curr_data = curr_data[curr_data["Balancing"] == 0]
@@ -710,7 +807,7 @@ class PlotUtils:
 if __name__ == "__main__":
     codebase_folder: str = os.environ['CURRENT_CODEBASE_FOLDER']
     folder: str = codebase_folder + "python_data/BooleanCryptoGP/"
-    exp_name: str = "results_1"
+    #exp_name: str = "results_1"
     #print(mpl.font_manager.get_font_names())
     '''
     s = ""
@@ -728,24 +825,29 @@ if __name__ == "__main__":
     #r: List[float] = [24, 52, 110, 228, 470, 958, 1948, 3946, 7966, 16046, 32266]
     #print(stats.wilcoxon(b, r, alternative="greater"))
 
-    #PlotUtils.stat_plot_3(folder+"results", [13, 14, 15, 16], 1000, 25, 5, True, False, True, list(range(1, 30 + 1)), "Degree")
-    #PlotUtils.stat_plot_3_make_it_balanced(folder+"results", [13, 14, 15, 16], 1000, 25, 5, False, True, list(range(1, 30 + 1)), "Degree")
+    #PlotUtils.stat_plot_3(folder,"results", [13, 14, 15, 16], 1000, 25, 5, True, False, True, list(range(1, 30 + 1)), "Degree")
+    #PlotUtils.stat_plot_3_make_it_balanced(folder,"results", [13, 14, 15, 16], 1000, 25, 5, False, True, list(range(1, 30 + 1)), "Degree")
 
     #for n_bits in range(6, 16 + 1):
     #    for objective in ["Resiliency"]:
-    #        PlotUtils.stat_plot_2(folder+"results", n_bits, 1000, 25, 5, False, True, list(range(1, 30 + 1)), objective)
+    #        PlotUtils.stat_plot_2(folder,"results", n_bits, 1000, 25, 5, False, True, list(range(1, 30 + 1)), objective)
     #        exit(1)
     #for i in range(1, 30+1):
-    #    PlotUtils.plot_scatter_bi_objective_pareto_front(folder+"results", 10, 1000, 25, 5, True, False, True, i)
-    #PlotUtils.big_stat_plot_relplot(folder+"results", list(range(6, 16 + 1)), 1000, 25, 5, False, True, list(range(1, 30 + 1)))
-    #PlotUtils.plot_all_non_linearity_zero_balancing_resiliency_max_degree_stats(folder+"results", "RANDOM", list(range(6, 16 + 1)), 1000, 0, 5, False, True, list(range(1, 30 + 1)))
-    #PlotUtils.check_pareto_front_values(folder+"results", "RANDOM", list(range(6, 16 + 1)), 1000, 0, 5, False, True, list(range(1, 30 + 1)))
-    #PlotUtils.print_non_linearity_zero_balancing_resiliency_max_degree_all_p_values_combo(folder+"results", list(range(6, 15 + 1)), 5, False, True, list(range(1, 30 + 1)))
-    #PlotUtils.plot_all_non_linearity_zero_balancing_resiliency_max_degree_stats_random_all_representations(folder+"results", list(range(6, 16 + 1)), 250, 4, 5, False, True, list(range(1, 30 + 1)))
+    #    PlotUtils.plot_scatter_bi_objective_pareto_front(folder,"results", 10, 1000, 25, 5, True, False, True, i)
+    #PlotUtils.big_stat_plot_relplot(folder,"results", list(range(6, 16 + 1)), 1000, 25, 5, False, True, list(range(1, 30 + 1)))
+    #PlotUtils.plot_all_non_linearity_zero_balancing_resiliency_max_degree_stats(folder,"results", "RANDOM", list(range(6, 16 + 1)), 1000, 0, 5, False, True, list(range(1, 30 + 1)))
+    #PlotUtils.check_pareto_front_values(folder,"results", "RANDOM", list(range(6, 16 + 1)), 1000, 0, 5, False, True, list(range(1, 30 + 1)))
+    #PlotUtils.print_non_linearity_zero_balancing_resiliency_max_degree_all_p_values_combo(folder,"results", list(range(6, 15 + 1)), 5, False, True, list(range(1, 30 + 1)))
+    #PlotUtils.plot_all_non_linearity_zero_balancing_resiliency_max_degree_stats_random_all_representations(folder,"results", list(range(6, 16 + 1)), 250, 4, 5, False, True, list(range(1, 30 + 1)))
 
-    #PlotUtils.plot_all_non_linearity_zero_balancing_resiliency_max_degree_stats(folder + exp_name, 'GPNSGA2', n_bits_list=list(range(6, 16 + 1)), pop_size=500, num_gen=5, max_depth=5, pressure=5, force_bent=False, spectral_inversion=True, dataset_type='integer', nearest_bool_mapping='pos_neg_zero', bent_mapping='pos_neg', binary_balancing=True, non_linearity_only=True, seed_list=list(range(1, 30 + 1)))
-    #PlotUtils.plot_all_non_linearity_zero_balancing_resiliency_max_degree_stats_all_algorithms(folder + exp_name, n_bits_list=list(range(6, 16 + 1)), pop_size=500, num_gen=5, max_depth=5, pressure=5, force_bent=False, spectral_inversion=True, dataset_type='integer', nearest_bool_mapping='pos_neg_zero', bent_mapping='pos_neg', binary_balancing=True, non_linearity_only=True, seed_list=list(range(1, 30 + 1)))
-    #for iii in [8, 9, 10]:
-    #    for bbb in [True, False]:
-    #        PlotUtils.simple_stat_objective_plot(folder+exp_name, "GPNSGA2", n_bits=iii, pop_size=500, num_gen=5, max_depth=5, pressure=5, make_it_balanced=bbb, force_bent=False, spectral_inversion=True, dataset_type='integer', nearest_bool_mapping='pos_neg_zero', bent_mapping='pos_neg', binary_balancing=True, non_linearity_only=True, seed_list=list(range(1, 30 + 1)), objective="PercentageUncertainPositions")
-    PlotUtils.check_pareto_front_values(folder+exp_name, "GPNSGA2", n_bits_list=list(range(6, 16 + 1)), pop_size=500, num_gen=5, max_depth=5, pressure=5, force_bent=False, spectral_inversion=True, dataset_type='integer', nearest_bool_mapping='pos_neg_zero', bent_mapping='pos_neg', binary_balancing=True, non_linearity_only=True, seed_list=list(range(1, 30 + 1)))
+    #PlotUtils.plot_all_non_linearity_zero_balancing_resiliency_max_degree_stats(folder, exp_name, 'GPNSGA2', n_bits_list=list(range(6, 16 + 1)), pop_size=500, num_gen=5, max_depth=5, pressure=5, force_bent=False, spectral_inversion=True, dataset_type='integer', nearest_bool_mapping='pos_neg_zero', bent_mapping='pos_neg', binary_balancing=True, non_linearity_only=True, seed_list=list(range(1, 30 + 1)))
+    
+    #PlotUtils.plot_all_non_linearity_zero_balancing_resiliency_max_degree_stats_all_algorithms(folder, exp_name, n_bits_list=list(range(6, 16 + 1)), pop_size=500, num_gen=5, max_depth=5, pressure=5, force_bent=False, spectral_inversion=True, dataset_type='integer', nearest_bool_mapping='pos_neg_zero', bent_mapping='pos_neg', binary_balancing=True, non_linearity_only=True, seed_list=list(range(1, 30 + 1)))
+    for exp_name in ['results_1', 'results_2', 'results_3', 'results_4']:
+        for dataset_type in ['integer', 'binary', 'polar']:
+            PlotUtils.write_objective_line_plot_to_dat_file(folder,exp_name, n_bits_list=[8,12,16], pop_size=500, num_gen=5, max_depth=5, pressure=5, make_it_balanced=True, force_bent=False, spectral_inversion=True, dataset_type=dataset_type, nearest_bool_mapping='pos_neg_zero', bent_mapping='pos_neg', binary_balancing=True, non_linearity_only=True, seed_list=list(range(1, 30 + 1)), objective='PercentageUncertainPositions')
+    #for iii in [8, 16]:
+    #    for bbb in [True]:
+    #        PlotUtils.simple_stat_objective_plot(folder,exp_name, "GPNSGA2", n_bits=iii, pop_size=500, num_gen=5, max_depth=5, pressure=5, make_it_balanced=bbb, force_bent=False, spectral_inversion=True, dataset_type='integer', nearest_bool_mapping='pos_neg_zero', bent_mapping='pos_neg', binary_balancing=True, non_linearity_only=True, seed_list=list(range(1, 30 + 1)), objective="PercentageUncertainPositions")
+    
+    #PlotUtils.check_pareto_front_values(folder,exp_name, "GPNSGA2", n_bits_list=list(range(6, 16 + 1)), pop_size=500, num_gen=5, max_depth=5, pressure=5, force_bent=False, spectral_inversion=True, dataset_type='integer', nearest_bool_mapping='pos_neg_zero', bent_mapping='pos_neg', binary_balancing=True, non_linearity_only=True, seed_list=list(range(1, 30 + 1)))
