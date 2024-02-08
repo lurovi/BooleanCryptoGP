@@ -12,6 +12,7 @@ import argparse
 if __name__ == "__main__":
     codebase_folder: str = os.environ['CURRENT_CODEBASE_FOLDER']
     folder_name: str = codebase_folder + 'python_projects/BooleanCryptoGP/boolcryptogp/exps/' + "results_1"
+    #folder_name: str = '/mnt/data/lrovito/BooleanCryptoGP/results_1'
     pop_size: int = 500 * 5
     spectral_inversion: bool = True
     dataset_type: str = "integer"
